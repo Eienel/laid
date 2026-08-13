@@ -27,6 +27,14 @@ class BaselineHelpersTests(unittest.TestCase):
             with self.assertRaisesRegex(RuntimeError, "found 2"):
                 MODULE.find_class_directory(root, "real_dataset")
 
+    def test_find_class_directory_supports_kaggle_mount_alias(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            expected = root / "unexpected-mount-name" / "real_dataset"
+            expected.mkdir(parents=True)
+
+            self.assertEqual(MODULE.find_class_directory(root, "real_dataset"), expected)
+
 
 if __name__ == "__main__":
     unittest.main()

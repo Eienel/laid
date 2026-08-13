@@ -37,6 +37,8 @@ baseline, evaluates 100 real and 100 SDXL images, adds JPEG and downscale
 stress variants, and records predictions, fixed-threshold metrics, latency,
 and provenance. The external test dataset must be attached through Kaggle's
 **Add Input** control; image data is never downloaded to the local workstation.
+The runner discovers the dataset below `/kaggle/input`, because Kaggle's actual
+mount directory can differ from the dataset's public slug.
 
 Run the resource check before any model or dataset operation:
 

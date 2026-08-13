@@ -23,7 +23,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--input-root",
         type=Path,
-        default=Path("/kaggle/input/ai-vs-real-images-dataset"),
+        default=Path("/kaggle/input"),
     )
     parser.add_argument(
         "--output-dir",
@@ -94,7 +94,7 @@ def main() -> int:
         raise ValueError("--per-class must be at least 2")
     if not args.input_root.exists():
         raise RuntimeError(
-            f"dataset not found at {args.input_root}. In Kaggle, select Add Input and attach "
+            f"Kaggle input root not found at {args.input_root}. Select Add Input and attach "
             f"{DATASET_ID}."
         )
 
@@ -111,8 +111,14 @@ def main() -> int:
     sys.path.insert(0, str(official_repo))
     import models  # type: ignore[import-not-found]
 
-    real_root = find_class_directory(args.input_root, "real_dataset")
-    ai_root = find_class_directory(args.input_root, "Ai_generated_dataset")
+    try:
+        real_root = find_class_directory(args.input_root, "real_dataset")
+        ai_root = find_class_directory(args.input_root, "Ai_generated_dataset")
+    except RuntimeError as exc:
+        raise RuntimeError(
+            f"could not discover {DATASET_ID} below {args.input_root}; "
+            "confirm it is attached with Add Input"
+        ) from exc
     selected = [
         (path, 0, "real")
         for path in stratified_sample(image_paths(real_root), args.per_class, args.seed)
