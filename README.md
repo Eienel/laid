@@ -16,6 +16,18 @@ The current workstation has about 8 GB RAM, four logical CPU threads, and no
 - preflight defaults to at least 2 GB available RAM and 20 GB free disk;
 - large training and full benchmark runs belong on a remote GPU machine.
 
+## Kaggle quick start
+
+Kaggle is the preferred free GPU runner for the bake-off. Download or import
+[`notebooks/laid_kaggle_bootstrap.ipynb`](notebooks/laid_kaggle_bootstrap.ipynb)
+into a new Kaggle notebook. In Notebook options, select a GPU accelerator and
+turn Internet on, then choose **Run All**.
+
+The first cell refuses to continue unless CUDA is actually available. The
+notebook then clones this public repository, installs only the lightweight
+benchmark package, checks Kaggle's RAM and disk headroom, and runs the tests.
+Stop the Kaggle session when finished so idle time does not consume GPU quota.
+
 Run the resource check before any model or dataset operation:
 
 ```powershell

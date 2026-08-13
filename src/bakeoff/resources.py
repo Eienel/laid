@@ -41,10 +41,31 @@ def _windows_memory() -> tuple[int, int]:
     return status.ullTotalPhys, status.ullAvailPhys
 
 
+def _linux_memory(meminfo_path: Path = Path("/proc/meminfo")) -> tuple[int, int]:
+    values: dict[str, int] = {}
+    for line in meminfo_path.read_text(encoding="utf-8").splitlines():
+        key, separator, value = line.partition(":")
+        if not separator:
+            continue
+        fields = value.strip().split()
+        if fields:
+            values[key] = int(fields[0]) * 1024
+
+    try:
+        total = values["MemTotal"]
+        available = values["MemAvailable"]
+    except KeyError as exc:
+        raise OSError(f"missing {exc.args[0]} in {meminfo_path}") from exc
+    return total, available
+
+
 def snapshot(path: Path) -> ResourceSnapshot:
-    if os.name != "nt":
-        raise RuntimeError("This lightweight preflight currently supports Windows only")
-    total, available = _windows_memory()
+    if os.name == "nt":
+        total, available = _windows_memory()
+    elif Path("/proc/meminfo").exists():
+        total, available = _linux_memory()
+    else:
+        raise RuntimeError("Resource preflight supports Windows and procfs-based Linux")
     disk = shutil.disk_usage(path.resolve())
     gib = 1024**3
     return ResourceSnapshot(
