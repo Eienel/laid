@@ -71,6 +71,11 @@ The report includes overall balanced accuracy and dataset, generator, and
 degradation slices. A slice containing only one class is explicitly marked as
 not scored instead of producing a misleading number.
 
+Verified benchmark summaries are stored under `benchmark-results/`. The first
+Community Forensics 224 run reached 0.975 combined balanced accuracy on the
+small SDXL/Unsplash slice, with JPEG recompression identified as its weakest
+condition. This result is a baseline, not a claim of bounty-level coverage.
+
 ## Gates
 
 - Bounty requirement: balanced accuracy >= 0.75 at threshold 0.65.

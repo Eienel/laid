@@ -1,0 +1,17 @@
+{
+  "model": "OwensLab/commfor-model-224",
+  "official_source_commit": "ee5b71d43db0f3779e1edd64ee927b13f2dd6ad4",
+  "dataset": "rhythmghai/ai-vs-real-images-dataset",
+  "sample_seed": 323,
+  "samples_per_class": 100,
+  "prediction_rows": 600,
+  "threshold": 0.65,
+  "degradations": ["none", "jpeg75", "downscale50"],
+  "mean_inference_ms_per_image": {
+    "none": 6.189744480000172,
+    "jpeg75": 3.584724159999837,
+    "downscale50": 3.549157465000121
+  },
+  "gpu": "Tesla T4",
+  "submitted_zip_sha256": "1B056A53070503D21B954C029F984F19C451E4B77A549082CB08537617DA2992"
+}
