@@ -7,7 +7,7 @@ compare detector predictions under the bounty's exact decision rule:
 ## Resource policy
 
 The current workstation has about 8 GB RAM, four logical CPU threads, and no
-detected NVIDIA GPU. Therefore:
+ NVIDIA GPU. Therefore:
 
 - local training is disabled;
 - large datasets and PyTorch are not installed locally;
