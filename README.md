@@ -26,6 +26,8 @@ turn Internet on, then choose **Run All**.
 The first cell refuses to continue unless CUDA is actually available. The
 notebook then clones this public repository, installs only the lightweight
 benchmark package, checks Kaggle's RAM and disk headroom, and runs the tests.
+The Kaggle notebook uses a 10 GB free-disk floor because current sessions may
+start with slightly less than 20 GB of working storage.
 Stop the Kaggle session when finished so idle time does not consume GPU quota.
 
 Run the resource check before any model or dataset operation:
