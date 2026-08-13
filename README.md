@@ -30,6 +30,14 @@ The Kaggle notebook uses a 10 GB free-disk floor because current sessions may
 start with slightly less than 20 GB of working storage.
 Stop the Kaggle session when finished so idle time does not consume GPU quota.
 
+After bootstrap passes, import
+[`notebooks/laid_community_forensics_baseline.ipynb`](notebooks/laid_community_forensics_baseline.ipynb)
+for the first real model measurement. It treats Community Forensics as a
+baseline, evaluates 100 real and 100 SDXL images, adds JPEG and downscale
+stress variants, and records predictions, fixed-threshold metrics, latency,
+and provenance. The external test dataset must be attached through Kaggle's
+**Add Input** control; image data is never downloaded to the local workstation.
+
 Run the resource check before any model or dataset operation:
 
 ```powershell

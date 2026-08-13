@@ -58,3 +58,15 @@ it is not evidence that the candidate meets the bounty threshold.
 No complete dataset is to be downloaded to the local workstation. Small,
 balanced, license-compatible validation shards should be materialized on a
 remote runner and copied back only as prediction CSVs and summary reports.
+
+## First-pass external slice
+
+- Kaggle source: <https://www.kaggle.com/datasets/rhythmghai/ai-vs-real-images-dataset>
+- Verified size: 248,868,789 bytes with 250 SDXL and 745 real Unsplash images.
+- License shown by Kaggle: CC BY-NC-SA 4.0.
+- Use: evaluation only; select 100 samples per class across five content
+  categories and do not redistribute the images.
+- LAID-owned robustness slices: untouched, JPEG quality 75, and 50% downscale
+  followed by upscale.
+- Limitation: a single generator family cannot establish broad generalization;
+  this is a pipeline and failure-analysis baseline only.
