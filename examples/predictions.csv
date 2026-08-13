@@ -1,0 +1,5 @@
+sample_id,label,probability_ai,dataset,generator,degradation
+real-clean-1,0,0.10,smoke,camera,none
+real-jpeg-1,0,0.30,smoke,camera,jpeg
+fake-flux-1,1,0.91,smoke,flux,none
+fake-flux-jpeg-1,1,0.75,smoke,flux,jpeg

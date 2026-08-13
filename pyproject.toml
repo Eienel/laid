@@ -1,0 +1,15 @@
+[project]
+name = "local-ai-detector-bakeoff"
+version = "0.1.0"
+description = "Resource-safe benchmark harness for the POIDH local AI image detector bounty"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+
+[project.scripts]
+detector-bakeoff = "bakeoff.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools]
+package-dir = {"" = "src"}

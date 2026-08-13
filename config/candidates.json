@@ -1,0 +1,48 @@
+{
+  "policy": {
+    "required_threshold": 0.65,
+    "minimum_bounty_balanced_accuracy": 0.75,
+    "internal_go_no_go_balanced_accuracy": 0.80,
+    "max_parallel_models": 1,
+    "max_data_workers_local": 1,
+    "local_training_allowed": false
+  },
+  "candidates": [
+    {
+      "id": "ferretnet",
+      "role": "local-pixel artifact branch",
+      "license": "Apache-2.0",
+      "parameters_millions": 1.06,
+      "input_size": 256,
+      "source": "https://github.com/xigua7105/FerretNet",
+      "status": "research_verified_export_unverified"
+    },
+    {
+      "id": "community-forensics-224",
+      "role": "diverse-generator teacher and optional semantic branch",
+      "license": "MIT",
+      "input_size": 224,
+      "source": "https://github.com/JeongsooP/Community-Forensics",
+      "weights": "https://huggingface.co/OwensLab/commfor-model-224",
+      "source_weight_bytes": 86678644,
+      "status": "research_verified_onnx_candidate"
+    },
+    {
+      "id": "safe",
+      "role": "lightweight comparison baseline",
+      "license": "Apache-2.0",
+      "parameters_millions": 1.44,
+      "input_size": 256,
+      "source": "https://github.com/ouxiang-li/SAFE",
+      "status": "research_verified_export_unverified"
+    },
+    {
+      "id": "nonescape-mini",
+      "role": "pre-exported ONNX-friendly comparison baseline",
+      "license": "Apache-2.0",
+      "weights": "https://huggingface.co/e3ntity/nonescape-v0",
+      "source_weight_bytes": 86666672,
+      "status": "artifact_verified_benchmark_unverified"
+    }
+  ]
+}
