@@ -70,3 +70,16 @@ remote runner and copied back only as prediction CSVs and summary reports.
   followed by upscale.
 - Limitation: a single generator family cannot establish broad generalization;
   this is a pipeline and failure-analysis baseline only.
+
+## Second-pass multi-generator slice
+
+- Kaggle source: <https://www.kaggle.com/datasets/cartografia/unbiased-tiny-genimage>
+- Verified size: 2,525,870,358 bytes and 23,329 files.
+- Composition: 5,828 real images plus 2,500 each from ADM, BigGAN, GLIDE,
+  Midjourney, Stable Diffusion 1.5, VQDM, and Wukong.
+- Bias control: AI files were normalized to JPEG quality 96 and real images
+  were selected for matching compression and dimensions.
+- Sampling: 100 AI and 100 distinct real images per generator comparison,
+  repeated for clean, JPEG quality 75, and downscale stress.
+- Limitation: this adds generator breadth but does not represent newer FLUX,
+  Stable Diffusion 3, or other recent commercial generators.

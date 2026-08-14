@@ -35,6 +35,28 @@ class BaselineHelpersTests(unittest.TestCase):
 
             self.assertEqual(MODULE.find_class_directory(root, "real_dataset"), expected)
 
+    def test_multigen_selection_pairs_each_generator_with_unique_real_images(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            nature = root / "mount-alias" / "Nature"
+            nature.mkdir(parents=True)
+            for index in range(20):
+                (nature / f"real-{index}.jpg").touch()
+            for generator in MODULE.MULTIGEN_DIRECTORIES:
+                folder = root / "mount-alias" / generator
+                folder.mkdir(parents=True)
+                for index in range(3):
+                    (folder / f"fake-{index}.jpg").touch()
+
+            selected = MODULE.select_multigen(root, count=2, seed=323)
+
+        real = [record for record in selected if record[1] == 0]
+        fake = [record for record in selected if record[1] == 1]
+        self.assertEqual(len(real), 14)
+        self.assertEqual(len(fake), 14)
+        self.assertEqual(len({record[0] for record in real}), 14)
+        self.assertEqual({record[2] for record in real}, {record[2] for record in fake})
+
 
 if __name__ == "__main__":
     unittest.main()

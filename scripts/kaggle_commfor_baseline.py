@@ -13,9 +13,21 @@ from pathlib import Path
 
 
 IMAGE_EXTENSIONS = {".jpg", ".jpeg", ".png", ".webp", ".bmp"}
-DATASET_ID = "rhythmghai/ai-vs-real-images-dataset"
+DATASET_IDS = {
+    "sdxl": "rhythmghai/ai-vs-real-images-dataset",
+    "multigen": "cartografia/unbiased-tiny-genimage",
+}
 MODEL_ID = "OwensLab/commfor-model-224"
 OFFICIAL_COMMIT = "ee5b71d43db0f3779e1edd64ee927b13f2dd6ad4"
+MULTIGEN_DIRECTORIES = (
+    "ADM",
+    "BigGAN",
+    "glide",
+    "Midjourney",
+    "stable_diffusion_v_1_5",
+    "VQDM",
+    "wukong",
+)
 
 
 def parse_args() -> argparse.Namespace:
@@ -33,6 +45,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--per-class", type=int, default=100)
     parser.add_argument("--batch-size", type=int, default=32)
     parser.add_argument("--seed", type=int, default=323)
+    parser.add_argument("--dataset-kind", choices=("sdxl", "multigen"), default="sdxl")
     return parser.parse_args()
 
 
@@ -68,6 +81,45 @@ def stratified_sample(paths: list[Path], count: int, seed: int) -> list[Path]:
     return chosen
 
 
+def random_sample(paths: list[Path], count: int, seed: int) -> list[Path]:
+    if len(paths) < count:
+        raise RuntimeError(f"requested {count} images, but only found {len(paths)}")
+    return random.Random(seed).sample(paths, count)
+
+
+def select_sdxl(root: Path, count: int, seed: int) -> list[tuple[Path, int, str]]:
+    real_root = find_class_directory(root, "real_dataset")
+    ai_root = find_class_directory(root, "Ai_generated_dataset")
+    return [
+        (path, 0, "sdxl")
+        for path in stratified_sample(image_paths(real_root), count, seed)
+    ] + [
+        (path, 1, "sdxl")
+        for path in stratified_sample(image_paths(ai_root), count, seed + 1)
+    ]
+
+
+def select_multigen(root: Path, count: int, seed: int) -> list[tuple[Path, int, str]]:
+    nature = find_class_directory(root, "Nature")
+    real_paths = random_sample(
+        image_paths(nature), count * len(MULTIGEN_DIRECTORIES), seed
+    )
+    selected: list[tuple[Path, int, str]] = []
+    for index, directory_name in enumerate(MULTIGEN_DIRECTORIES):
+        generator_root = find_class_directory(root, directory_name)
+        generator = directory_name.lower()
+        real_start = index * count
+        selected.extend(
+            (path, 0, generator)
+            for path in real_paths[real_start : real_start + count]
+        )
+        selected.extend(
+            (path, 1, generator)
+            for path in random_sample(image_paths(generator_root), count, seed + index + 1)
+        )
+    return selected
+
+
 def degraded(image, name: str):
     from PIL import Image
 
@@ -95,7 +147,7 @@ def main() -> int:
     if not args.input_root.exists():
         raise RuntimeError(
             f"Kaggle input root not found at {args.input_root}. Select Add Input and attach "
-            f"{DATASET_ID}."
+            f"{DATASET_IDS[args.dataset_kind]}."
         )
 
     import torch
@@ -112,20 +164,16 @@ def main() -> int:
     import models  # type: ignore[import-not-found]
 
     try:
-        real_root = find_class_directory(args.input_root, "real_dataset")
-        ai_root = find_class_directory(args.input_root, "Ai_generated_dataset")
+        selected = (
+            select_sdxl(args.input_root, args.per_class, args.seed)
+            if args.dataset_kind == "sdxl"
+            else select_multigen(args.input_root, args.per_class, args.seed)
+        )
     except RuntimeError as exc:
         raise RuntimeError(
-            f"could not discover {DATASET_ID} below {args.input_root}; "
+            f"could not discover {DATASET_IDS[args.dataset_kind]} below {args.input_root}; "
             "confirm it is attached with Add Input"
         ) from exc
-    selected = [
-        (path, 0, "real")
-        for path in stratified_sample(image_paths(real_root), args.per_class, args.seed)
-    ] + [
-        (path, 1, "sdxl")
-        for path in stratified_sample(image_paths(ai_root), args.per_class, args.seed + 1)
-    ]
 
     preprocess = transforms.Compose(
         [
@@ -140,6 +188,13 @@ def main() -> int:
     )
     device = torch.device("cuda:0")
     model = models.ViTClassifier.from_pretrained(MODEL_ID).to(device).eval()
+
+    with Image.open(selected[0][0]) as warmup_source:
+        warmup = preprocess(warmup_source.convert("RGB")).unsqueeze(0).to(device)
+    with torch.inference_mode():
+        for _ in range(3):
+            model(warmup)
+    torch.cuda.synchronize()
 
     rows: list[dict[str, str | int | float]] = []
     latencies_ms: dict[str, float] = {}
@@ -170,7 +225,7 @@ def main() -> int:
                     "sample_id": f"{relative}::{degradation}",
                     "label": label,
                     "probability_ai": probability,
-                    "dataset": "ai-vs-real-sdxl",
+                    "dataset": args.dataset_kind,
                     "generator": generator,
                     "degradation": degradation,
                 }
@@ -201,7 +256,8 @@ def main() -> int:
     provenance = {
         "model": MODEL_ID,
         "official_source_commit": OFFICIAL_COMMIT,
-        "dataset": DATASET_ID,
+        "dataset": DATASET_IDS[args.dataset_kind],
+        "dataset_kind": args.dataset_kind,
         "sample_seed": args.seed,
         "samples_per_class": args.per_class,
         "prediction_rows": len(rows),
@@ -211,8 +267,13 @@ def main() -> int:
         "gpu": torch.cuda.get_device_name(0),
         "notes": [
             "Baseline candidate only; not the final LAID model.",
-            "Dataset covers SDXL and real Unsplash photos, not broad generator diversity.",
+            (
+                "Dataset covers SDXL and real Unsplash photos only."
+                if args.dataset_kind == "sdxl"
+                else "Dataset covers seven legacy-to-mid-generation model families, not FLUX or SD3."
+            ),
             "Latency excludes model download, image decoding, and preprocessing.",
+            "Three untimed CUDA warm-up passes run before latency measurement.",
         ],
     }
     (args.output_dir / "provenance.json").write_text(

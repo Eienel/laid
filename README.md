@@ -40,6 +40,11 @@ and provenance. The external test dataset must be attached through Kaggle's
 The runner discovers the dataset below `/kaggle/input`, because Kaggle's actual
 mount directory can differ from the dataset's public slug.
 
+The second gate is
+[`notebooks/laid_community_forensics_multigen.ipynb`](notebooks/laid_community_forensics_multigen.ipynb).
+It uses Unbiased Tiny GenImage to score seven generator families against
+distinct real-image subsets under the same clean, JPEG, and resize conditions.
+
 Run the resource check before any model or dataset operation:
 
 ```powershell
